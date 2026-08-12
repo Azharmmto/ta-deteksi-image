@@ -1,0 +1,8 @@
+# Dependencies for export_to_onnx.py only. Not needed to run the Flask
+# app -- install these in a separate/throwaway environment if you'd
+# rather keep your serving environment free of PyTorch entirely.
+torch>=2.2
+timm>=0.9
+onnx>=1.15
+onnxruntime>=1.17
+numpy>=1.26,<3.0

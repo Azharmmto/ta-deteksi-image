@@ -1,0 +1,9 @@
+# Runtime dependencies for the Flask web app only.
+# Deliberately does NOT include torch/timm -- the app serves predictions
+# purely through ONNX Runtime, which is what keeps startup fast and
+# memory usage low. See requirements-export.txt for the (separate,
+# one-time) ONNX export step.
+flask>=3.0,<4.0
+onnxruntime>=1.17,<2.0
+Pillow>=10.0,<13.0
+numpy>=1.26,<3.0

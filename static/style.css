@@ -1,0 +1,726 @@
+/* font google */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+:root {
+  /* Warna utama */
+  --color-primary: #094cb2;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #3366cc;
+  --color-on-primary-container: #e7ebff;
+  --color-primary-fixed: #d9e2ff;
+
+  /* Warna dasar / permukaan */
+  --color-background: #faf9fa;
+  --color-surface: #faf9fa;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f5f3f4;
+  --color-surface-container: #efedee;
+  --color-surface-container-high: #e9e8e9;
+  --color-surface-container-highest: #e3e2e3;
+  --color-surface-dim: #dbdadb;
+
+  /* Teks */
+  --color-on-surface: #1b1c1d;
+  --color-on-surface-variant: #434653;
+
+  /* Sekunder */
+  --color-secondary: #5a5f63;
+  --color-on-secondary-container: #606569;
+
+  /* Outline */
+  --color-outline: #737784;
+  --color-outline-variant: #c3c6d5;
+
+  /* Error / status "AI-generated" */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* Radius (disesuaikan dengan konfigurasi desain asli) */
+  --radius-default: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+  --radius-card: 16px;
+
+  /* Tipografi */
+  --font-headline: "Montserrat", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+  --font-label: "Google Sans", sans-serif;
+}
+
+/* ==========================================================
+  2. RESET DASAR
+  ========================================================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+  padding-top: 96px; /* memberi ruang untuk header fixed */
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Ikon Material Symbols butuh pengaturan dasar ini agar tampil benar */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Efek tekan pada elemen interaktif */
+.pressable {
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.pressable:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================================
+  3. HEADER / NAVBAR
+  ========================================================== */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  height: 80px;
+  background: rgba(245, 243, 244, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  max-width: 1536px;
+  margin: 0 auto;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.logo {
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.main-nav {
+  display: none;
+  gap: 24px;
+}
+
+.nav-link {
+  font-family: var(--font-label);
+  color: var(--color-on-surface-variant);
+  padding: 4px 12px;
+  border-radius: var(--radius-default);
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+}
+
+.nav-link.active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 4px;
+  background: none;
+}
+
+.header-right {
+  display: none;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-text {
+  background: none;
+  font-family: var(--font-label);
+  font-weight: 500;
+  color: var(--color-on-surface-variant);
+  transition: color 0.2s ease;
+}
+.btn-text:hover {
+  color: var(--color-primary);
+}
+
+.btn-cite {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--font-label);
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-default);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-cite:hover {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+@media (min-width: 768px) {
+  .main-nav { display: flex; }
+  .header-right { display: flex; }
+}
+
+/* ==========================================================
+  4. LAYOUT UTAMA
+  ========================================================== */
+.page-content {
+  flex-grow: 1;
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 48px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-heading {
+  text-align: center;
+  max-width: 48rem;
+  margin-bottom: 48px;
+}
+
+.page-heading h2 {
+  font-family: var(--font-headline);
+  font-weight: 500;
+  font-size: 1.8rem !important;
+  line-height: 1.2;
+  color: var(--color-on-surface);
+  margin: 0 0 14px 0;
+}
+
+@media (min-width: 768px) {
+  .page-heading h2 { font-size: 3rem; }
+}
+
+.page-heading p {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+/* Kartu kaca buram, dipakai untuk semua panel utama */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(195, 198, 213, 0.15);
+  border-radius: var(--radius-card);
+}
+
+/* ==========================================================
+  5. AREA UPLOAD
+  ========================================================== */
+.upload-card {
+  width: 100%;
+  max-width: 42rem;
+  padding: 32px;
+  margin-bottom: 48px;
+}
+
+.upload-zone {
+  border: 2px dashed var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: var(--color-surface-container-lowest);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.upload-zone:hover {
+  background-color: var(--color-surface-container-low);
+}
+
+.upload-zone.dragover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-fixed);
+}
+
+.upload-icon {
+  font-size: 2.25rem;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+}
+
+.upload-title {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--color-on-surface);
+  margin: 0 0 8px 0;
+}
+
+.upload-or {
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 16px 0;
+}
+
+.btn-browse {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-primary);
+  font-family: var(--font-label);
+  font-weight: 500;
+  padding: 8px 24px;
+  border-radius: var(--radius-lg);
+  transition: background-color 0.2s ease;
+}
+.btn-browse:hover {
+  background-color: var(--color-surface-container-highest);
+}
+
+.upload-hint {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  margin: 16px 0 0 0;
+}
+
+.visually-hidden-input {
+  display: none;
+}
+
+/* ==========================================================
+  6. AREA PREVIEW
+  ========================================================== */
+.preview-area {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 24px;
+}
+.preview-area.is-visible {
+  display: flex;
+}
+
+.preview-image-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid rgba(195, 198, 213, 0.2);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.preview-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-meta {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 28rem;
+  font-family: var(--font-label);
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+  margin-bottom: 24px;
+  padding: 0 8px;
+}
+
+.preview-meta .file-name {
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-meta .file-info-group {
+  display: flex;
+  gap: 16px;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-clear {
+  background: none;
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-label);
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: var(--radius-lg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-clear:hover {
+  background-color: var(--color-surface-container);
+  color: var(--color-on-surface);
+}
+
+.btn-analyze {
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary-container));
+  color: var(--color-on-primary);
+  font-family: var(--font-label);
+  font-weight: 700;
+  padding: 12px 32px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 6px rgba(9, 76, 178, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  transition: box-shadow 0.2s ease;
+}
+.btn-analyze:hover {
+  box-shadow: 0 4px 12px rgba(9, 76, 178, 0.35);
+}
+
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #fff;
+  width: 24px;
+  height: 24px;
+  display: none;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================
+  6.1 PESAN ERROR (upload / inferensi backend)
+  ========================================================== */
+.error-banner {
+  display: none;
+  width: 100%;
+  max-width: 28rem;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  font-family: var(--font-label);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.error-banner.is-visible {
+  display: block;
+}
+
+/* ==========================================================
+  7. HASIL ANALISIS
+  ========================================================== */
+#results-section {
+  display: none;
+  width: 100%;
+  max-width: 56rem;
+  grid-template-columns: 1fr;
+  gap: 32px;
+
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#results-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  #results-section {
+      grid-template-columns: 1fr 1fr;
+  }
+}
+
+.result-card {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: 24px;
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+}
+
+.status-badge.is-authentic {
+  background-color: var(--color-primary-fixed);
+  color: var(--color-primary);
+}
+
+.status-badge .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.result-card h3 {
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0 0 16px 0;
+}
+
+.result-summary-text {
+  font-family: var(--font-body);
+  line-height: 1.7;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 32px 0;
+}
+
+.probability-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.probability-row-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-label);
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+}
+
+.probability-row-label .value-error {
+  font-weight: 700;
+  color: var(--color-error);
+}
+
+.probability-row-label .value-secondary {
+  font-weight: 700;
+  color: var(--color-secondary);
+}
+
+.probability-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-surface-container-high);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.probability-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  width: 0%;
+  transition: width 1s ease-out;
+}
+
+.probability-fill.fill-error {
+  background-color: var(--color-error);
+}
+
+.probability-fill.fill-secondary {
+  background-color: var(--color-secondary);
+}
+
+/* ==========================================================
+  8. KARTU VISUALISASI (grafik lingkaran)
+  ========================================================== */
+.chart-card {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-card h4 {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 24px 0;
+}
+
+.circular-chart {
+  display: block;
+  margin: 0 auto;
+  max-width: 80%;
+  max-height: 250px;
+  width: 12rem;
+  height: 12rem;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: var(--color-surface-container-high);
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  animation: progress 1s ease-out forwards;
+}
+
+.circle.stroke-error { color: var(--color-error); }
+.circle.stroke-primary { color: var(--color-primary); }
+
+@keyframes progress {
+  0% { stroke-dasharray: 0 100; }
+}
+
+.percentage {
+  fill: var(--color-on-surface);
+  font-family: var(--font-headline);
+  font-size: 0.5em;
+  text-anchor: middle;
+  font-weight: bold;
+}
+
+/* ==========================================================
+  9. FOOTER
+  ========================================================== */
+.site-footer {
+  width: 100%;
+  padding: 48px;
+  background-color: var(--color-surface-container);
+  margin-top: 48px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .site-footer {
+      flex-direction: row;
+  }
+}
+
+.footer-left {
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .footer-left { margin-bottom: 0; }
+}
+
+.footer-logo {
+  font-family: var(--font-label);
+  font-weight: 700;
+  color: var(--color-on-surface);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.footer-copy {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.footer-note {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  margin: 4px 0 0 0;
+  font-style: italic;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.footer-links a {
+  color: var(--color-on-surface-variant);
+  transition: color 0.3s ease;
+}
+
+.footer-left a{
+  display: flex;
+  align-items: center;
+  color: var(--color-on-surface-variant);
+  font-size: 0.8rem;
+}
+
+.footer-left a:hover{
+  color: var(--color-primary);
+}
+
+.footer-left a img{
+  width: 20px;
+  margin-right: 5px;
+
+}
