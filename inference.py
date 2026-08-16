@@ -1,22 +1,3 @@
-"""
-ONNX inference engine for the ViT-Tiny real-vs-AI-generated classifier.
-
-Preprocessing here is a NumPy/Pillow re-implementation of the notebook's
-`eval_transforms` (Section 7):
-
-    transforms.Compose([
-        transforms.Resize((224, 224), interpolation=InterpolationMode.BICUBIC),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-    ])
-
-No augmentation is applied (no flips/jitter), matching eval/test-time
-behaviour, not train-time behaviour.
-
-Postprocessing mirrors `predict_image()` (Section 19) exactly:
-sigmoid -> threshold -> LABEL_MAP -> confidence-of-predicted-class.
-"""
-
 import logging
 import threading
 
