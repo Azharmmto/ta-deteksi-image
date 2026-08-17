@@ -20,16 +20,6 @@ class ModelNotLoadedError(RuntimeError):
 
 
 class ONNXEngine:
-    """
-    Thin wrapper around an onnxruntime.InferenceSession.
-
-    The session is created exactly once (at process startup, see the
-    module-level `engine` instance below) and reused for every request.
-    Recreating a session per-request would repeatedly re-parse the model
-    graph and re-allocate execution buffers, which is wasteful on CPU
-    and is exactly what this class avoids.
-    """
-
     def __init__(self, model_path: str):
         self.model_path = model_path
         self.session: ort.InferenceSession | None = None
@@ -46,10 +36,6 @@ class ONNXEngine:
         with self._lock:
             try:
                 so = ort.SessionOptions()
-                # Single-threaded intra-op parallelism keeps CPU/memory
-                # usage predictable for a small, locally-run app serving
-                # one request at a time. Raise this if you need higher
-                # throughput under concurrent load.
                 so.intra_op_num_threads = 1
                 self.session = ort.InferenceSession(
                     self.model_path,
@@ -77,7 +63,7 @@ class ONNXEngine:
         """Run a forward pass and return the single raw logit as a Python float."""
         if not self.is_ready:
             raise ModelNotLoadedError(
-                self.load_error or "ONNX model is not loaded."
+                self.load_error or "Model ONNX tidak dimuat."
             )
         outputs = self.session.run([self.output_name], {self.input_name: input_array})
         logit = np.asarray(outputs[0]).reshape(-1)[0]
@@ -85,25 +71,26 @@ class ONNXEngine:
 
 
 def preprocess_image(image: Image.Image) -> np.ndarray:
-    """
-    Reproduce the notebook's eval_transforms exactly:
-      1. Resize to (IMG_SIZE, IMG_SIZE) with bicubic interpolation
-      2. Scale pixel values to [0, 1]  (equivalent to transforms.ToTensor())
-      3. Normalize with mean=std=0.5   (equivalent to transforms.Normalize)
-      4. HWC -> CHW, then add a batch dimension -> [1, 3, H, W]
-
-    `image` must already be a PIL Image in RGB mode.
-    """
+    # Resize gambar ke ukuran input model
     resized = image.resize((config.IMG_SIZE, config.IMG_SIZE), _BICUBIC)
 
+    # Ubah gambar ke array dan normalisasi nilai pixel 0–255 menjadi 0–1
     array = np.asarray(resized, dtype=np.float32) / 255.0  # HWC, [0, 1]
 
+    # Ambil nilai mean dan standar deviasi untuk normalisasi
     mean = np.asarray(config.MEAN, dtype=np.float32)
     std = np.asarray(config.STD, dtype=np.float32)
+
+    # Normalisasi pixel berdasarkan mean dan std    
     array = (array - mean) / std
 
+    # Ubah format HWC menjadi CHW untuk PyTorch
     array = array.transpose(2, 0, 1)  # HWC -> CHW
+
+    # Tambahkan dimensi batch menjadi [1, 3, H, W]
     array = np.expand_dims(array, axis=0)  # -> [1, 3, H, W]
+
+    # Pastikan array bertipe float32 dan tersusun secara contiguous
     return np.ascontiguousarray(array, dtype=np.float32)
 
 
