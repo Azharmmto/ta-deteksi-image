@@ -2,10 +2,9 @@ import logging
 
 from flask import Flask, jsonify, render_template, request
 
-# Configured BEFORE importing inference: inference.py loads the ONNX
-# model at import time (module-level singleton) and logs the outcome
-# immediately, so logging must already be set up for that message to
-# be formatted consistently with everything else.
+# (module-level singleton). jika terjadi error atau sukses saat memuat model, 
+# pesan log akan langsung dicetak. Dengan mengatur logging di awal, kita memastikan 
+# pesan dari `inference.py` memiliki format waktu dan level yang seragam.
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -15,8 +14,8 @@ import validation
 
 app = Flask(__name__)
 
-# Defense in depth: reject oversized request bodies at the WSGI level,
-# before Flask even finishes reading them into memory. validation.py's
+# Validasi akurat per byte file-nya sendiri tetap akan ditangani oleh validation.py.
+# Jika pengguna iseng mengunggah file sebesar 5 GB, Flask akan memblokirnya
 # own size check (config.MAX_FILE_SIZE_BYTES) is a second, more precise
 # check that runs after this coarse limit already passed.
 app.config["MAX_CONTENT_LENGTH"] = config.MAX_FILE_SIZE_BYTES + (1 * 1024 * 1024)
@@ -24,13 +23,14 @@ app.config["MAX_CONTENT_LENGTH"] = config.MAX_FILE_SIZE_BYTES + (1 * 1024 * 1024
 
 @app.route("/")
 def index():
-    """Serve the existing upload UI unchanged."""
-    return render_template("index.html")
+
+    return render_template("index.html") # membeaca tmeplate html
 
 
 @app.route("/health")
 def health():
-    """Lightweight readiness probe -- mainly useful for confirming the ONNX model loaded."""
+    # # Mengembalikan JSON berisi status.
+    # jika model gagal dimuat, status HTTP adalah 503 (Service Unavailable).
     ready = inference.engine.is_ready
     return jsonify(
         status="ok" if ready else "model_unavailable",
@@ -41,23 +41,8 @@ def health():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """
-    Accepts a single image upload under the form field "image",
-    validates it, runs ONNX inference, and returns:
-
-        {
-            "success": true,
-            "prediction": "AI-Generated" | "Real",
-            "is_ai_generated": bool,
-            "confidence": float,        # confidence of the predicted class, in %
-            "probability_real": float,  # P(Real), in %
-            "probability_ai": float     # P(AI-Generated), in %
-        }
-
-    or, on failure:
-
-        { "success": false, "error": "<message>" }
-    """
+    # Jika model ONNX gagal diload saat server menyala, kita langsung menolak 
+    # request agar tidak terjadi error lanjutan di dalam sistem.
     if not inference.engine.is_ready:
         return jsonify(
             success=False,
@@ -69,34 +54,43 @@ def predict():
         ), 503
 
     try:
-        image = validation.validate_and_load_image(request.files.get("image"))
+        image = validation.validate_and_load_image(request.files.get("image")) # Mengambil file dari form HTML yang memiliki atribut name="image"
     except validation.ValidationError as exc:
+
+        # Menangkap error kustom dari validation.py dan mengembalikannya ke pengguna
         return jsonify(success=False, error=exc.message), exc.status_code
 
     try:
+
+        # Mengirim objek gambar yang sudah valid ke mesin AI
         result = inference.predict(image)
     except inference.ModelNotLoadedError as exc:
+
+        # Menjaga kemungkinan model tiba-tiba tidak tersedia
         return jsonify(success=False, error=str(exc)), 503
     except Exception:
-        logger.exception("Inference failed for an uploaded image")
-        return jsonify(success=False, error="Inference failed due to an internal server error."), 500
+        logger.exception("inferensi gagal")
+        return jsonify(success=False, error="inferensi gambar"), 500
 
     return jsonify(success=True, **result)
 
 
 @app.errorhandler(413)
 def handle_too_large(_exc):
+    # jika request melebihi app.config["MAX_CONTENT_LENGTH"]
     max_mb = config.MAX_FILE_SIZE_BYTES / (1024 * 1024)
-    return jsonify(success=False, error=f"File too large. Maximum allowed is {max_mb:.0f} MB."), 413
+    return jsonify(success=False, error=f"Ukuran terlalu besar. Maksimum {max_mb:.0f} MB."), 413
 
 
 @app.errorhandler(404)
 def handle_not_found(_exc):
+    # jika pengguna mengakses URL yang tidak ada (misal /predik atau /test)
     return jsonify(success=False, error="Not found."), 404
 
 
 @app.errorhandler(500)
 def handle_server_error(_exc):
+    #jika kode server mengalami crash secara internal
     return jsonify(success=False, error="Internal server error."), 500
 
 

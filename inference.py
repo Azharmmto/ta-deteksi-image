@@ -21,27 +21,28 @@ class ModelNotLoadedError(RuntimeError):
 
 class ONNXEngine:
     def __init__(self, model_path: str):
+        # simpan path model dan menyiapkan variabel sesi
         self.model_path = model_path
         self.session: ort.InferenceSession | None = None
         self.input_name: str | None = None
         self.output_name: str | None = None
         self.load_error: str | None = None
-        # onnxruntime sessions are safe for concurrent Run() calls from
-        # multiple threads, but we still guard session *creation* with
-        # a lock in case of concurrent app reloads.
-        self._lock = threading.Lock()
-        self._load()
+        self._lock = threading.Lock() 
+        self._load() # Memanggil fungsi load saat class dibuat
 
     def _load(self):
+        # Memuat model ke memori
         with self._lock:
             try:
                 so = ort.SessionOptions()
-                so.intra_op_num_threads = 1
+                so.intra_op_num_threads = 1 # Membatasi penggunaan thread CPU agar server tidak hang
                 self.session = ort.InferenceSession(
                     self.model_path,
                     sess_options=so,
-                    providers=["CPUExecutionProvider"],
+                    providers=["CPUExecutionProvider"], # Menjalankan model murni dengan CPU
                 )
+
+                # Menyimpan nama input dan output layer dari model
                 self.input_name = self.session.get_inputs()[0].name
                 self.output_name = self.session.get_outputs()[0].name
                 logger.info(
@@ -71,26 +72,28 @@ class ONNXEngine:
 
 
 def preprocess_image(image: Image.Image) -> np.ndarray:
-    # Resize gambar ke ukuran input model
+    # Mengubah resolusi gambar menjadi 224x224 dengan algoritma BICUBIC agar tidak blur
     resized = image.resize((config.IMG_SIZE, config.IMG_SIZE), _BICUBIC)
 
-    # Ubah gambar ke array dan normalisasi nilai pixel 0–255 menjadi 0–1
+    # Mengubah gambar ke matriks angka dan menormalisasi warna (0-255 jadi 0.0-1.0)
     array = np.asarray(resized, dtype=np.float32) / 255.0  # HWC, [0, 1]
 
-    # Ambil nilai mean dan standar deviasi untuk normalisasi
+    # Normalisasi Z-Score (Mean & Standar Deviasi) sesuai konfigurasi   
     mean = np.asarray(config.MEAN, dtype=np.float32)
     std = np.asarray(config.STD, dtype=np.float32)
 
     # Normalisasi pixel berdasarkan mean dan std    
     array = (array - mean) / std
 
-    # Ubah format HWC menjadi CHW untuk PyTorch
-    array = array.transpose(2, 0, 1)  # HWC -> CHW
+    # PyTorch/ONNX membaca format gambar sebagai Channel, Height, Width (CHW)
+    array = array.transpose(2, 0, 1)  # Geser posisi matriks dari [224,224,3] menjadi [3,224,224]
 
-    # Tambahkan dimensi batch menjadi [1, 3, H, W]
-    array = np.expand_dims(array, axis=0)  # -> [1, 3, H, W]
+    # Model AI selalu meminta data dalam bentuk "Batch" (kumpulan). 
+    # Karena kita memproses 1 gambar, tambahkan dimensi semu di depan.
+    array = np.expand_dims(array, axis=0)  # Menjadi [1, 3, 224, 224]
 
-    # Pastikan array bertipe float32 dan tersusun secara contiguous
+    # Ini mempercepat pembacaan data oleh ONNX Runtime.
+    # # Menyusun ulang blok memori RAM agar berurutan (Contiguous)
     return np.ascontiguousarray(array, dtype=np.float32)
 
 
@@ -104,18 +107,14 @@ def _sigmoid(x: float) -> float:
 
 
 def postprocess_logit(logit: float) -> dict:
-    """
-    Mirrors predict_image() from the notebook (Section 19) exactly:
-        prob = sigmoid(logit)                      # P(class == "Real")
-        pred_label = 1 if prob >= threshold else 0
-        class_name = LABEL_MAP[pred_label]
-        confidence = prob if pred_label == 1 else (1 - prob)
-    """
-    prob_real = _sigmoid(logit)
-    prob_ai = 1.0 - prob_real
+    prob_real = _sigmoid(logit) # Menghitung kemungkinan gambar Asli (Real)
+    prob_ai = 1.0 - prob_real # Kemungkinan AI adalah kebalikannya (100% - Real)
 
+    # kalau kemungkinan Real lebih dari Threshold (0.5 / 50%), maka labelnya 1 (Real)
     pred_label = 1 if prob_real >= config.THRESHOLD else 0
     class_name = config.LABEL_MAP[pred_label]
+
+    # menentukan confidence score yang ditampilkan
     confidence = prob_real if pred_label == 1 else prob_ai
 
     return {
