@@ -107,8 +107,8 @@ def _sigmoid(x: float) -> float:
 
 
 def postprocess_logit(logit: float) -> dict:
-    prob_real = _sigmoid(logit) # Menghitung kemungkinan gambar Asli (Real)
-    prob_ai = 1.0 - prob_real # Kemungkinan AI adalah kebalikannya (100% - Real)
+    prob_real = _sigmoid(logit) # menghitung kemungkinan gambar Asli (Real)
+    prob_ai = 1.0 - prob_real # menghitung sisa probabilitas untuk AI
 
     # kalau kemungkinan Real lebih dari Threshold (0.5 / 50%), maka labelnya 1 (Real)
     pred_label = 1 if prob_real >= config.THRESHOLD else 0
@@ -117,10 +117,11 @@ def postprocess_logit(logit: float) -> dict:
     # menentukan confidence score yang ditampilkan
     confidence = prob_real if pred_label == 1 else prob_ai
 
+    # menghitung presentase probabilitas
     return {
         "prediction": class_name,
         "is_ai_generated": pred_label == 0,
-        "confidence": round(confidence * 100, 2),
+        "confidence": round(confidence * 100, 2), # kali 100 untuk menjadikan presen
         "probability_real": round(prob_real * 100, 2),
         "probability_ai": round(prob_ai * 100, 2),
     }

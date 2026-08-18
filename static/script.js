@@ -149,18 +149,19 @@ document.addEventListener('DOMContentLoaded', () => {
       errorBanner.classList.remove('is-visible');
     }
 
-    // Menampilkan hasil analisis dari backend.
-    // `data` adalah hasil JSON dari endpoint /predict:
-    //   { is_ai_generated, confidence, probability_ai, probability_real, ... }
+
+    // menampilkan presentase
     function showResults(data) {
+        // mengambil data dari flask
       const isAI = data.is_ai_generated;
       const score = data.confidence;              // confidence kelas yang diprediksi
       const aiProb = data.probability_ai;
       const realProb = data.probability_real;
 
+      // tampil card hasil
       resultsSection.style.display = 'grid';
 
-      // Memicu reflow agar animasi transisi berjalan
+      // agar animasi transisi berjalan
       void resultsSection.offsetWidth;
 
       resultsSection.classList.add('visible');
@@ -181,12 +182,18 @@ document.addEventListener('DOMContentLoaded', () => {
           confidenceCircle.classList.add('stroke-primary');
       }
 
+
       aiProbBar.style.width = `${aiProb}%`;
       authProbBar.style.width = `${realProb}%`;
+
+      // menampilkan presentase probabilitas
       aiProbText.textContent = `${aiProb}%`;
       authProbText.textContent = `${realProb}%`;
 
+      // menampilkan lingkaran sesuai confidence score
       confidenceCircle.style.strokeDasharray = `${score}, 100`;
+
+      // fungsi animasi angka dari 0 ke confidence score
       animateValue(confidenceText, 0, score, 1000);
     }
 
