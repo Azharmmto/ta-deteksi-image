@@ -41,7 +41,7 @@ def health():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    # Jika model ONNX gagal diload saat server menyala, kita langsung menolak 
+    # jika model ONNX gagal diload saat server menyala, kita langsung menolak 
     # request agar tidak terjadi error lanjutan di dalam sistem.
     if not inference.engine.is_ready:
         return jsonify(

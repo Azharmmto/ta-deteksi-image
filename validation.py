@@ -32,10 +32,6 @@ def validate_and_load_image(file_storage: FileStorage) -> Image.Image:
         allowed = ", ".join(sorted(config.ALLOWED_EXTENSIONS)).upper()
         raise ValidationError(f"File tidak valid. Extension harus '{ext}'. Allowed types: {allowed}.")
 
-    # ── Cek MIME Type dari Browser 
-    if file_storage.mimetype not in config.ALLOWED_MIME_TYPES:
-        raise ValidationError(f"File tidak valid. MIME type '{file_storage.mimetype}' tidak didukung.")
-
     # ── cek ukuran file
     file_bytes = file_storage.read()
     if len(file_bytes) == 0:
@@ -51,7 +47,7 @@ def validate_and_load_image(file_storage: FileStorage) -> Image.Image:
         with Image.open(buffer) as probe:
             probe.verify()
             # verify() mengecek header file.
-            # jika user mengunggah file .exe yang di-rename menjadi .jpg, verify() akan gagal.
+            # jika user mengunggah file lain yang di-rename menjadi .jpg, verify() akan gagal.
     except Exception as exc:
         raise ValidationError("File tidak valid.") from exc
 
