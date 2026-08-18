@@ -1,5 +1,6 @@
 {
   "workbench.colorTheme": "One Dark Pro Darker",
   "workbench.iconTheme": "vscode-icons",
-  "editor.fontSize": 14
+  "editor.fontSize": 14,
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

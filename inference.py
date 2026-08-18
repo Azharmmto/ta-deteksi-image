@@ -8,18 +8,16 @@ from PIL import Image
 
 import config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # setup logger untuk mencatat informasi dan error selama eksekusi kode
 
-# Pillow >= 9.1 exposes Image.Resampling.BICUBIC; older versions only
-# have the flat Image.BICUBIC constant. Support both transparently.
+ # risize gambar dengan algoritma BICUBIC agar tidak blur
 _BICUBIC = getattr(getattr(Image, "Resampling", Image), "BICUBIC")
 
 
 class ModelNotLoadedError(RuntimeError):
-    """Raised when a prediction is requested but the ONNX model failed to load."""
+    """File model tidak di temukan atau gagal dimuat. Biasanya karena file ONNX tidak ada di server."""
 
-
-class ONNXEngine:
+class ONNXEngine: # agar model di load di ram
     def __init__(self, model_path: str):
         # simpan path model dan menyiapkan variabel sesi
         self.model_path = model_path
@@ -35,11 +33,11 @@ class ONNXEngine:
         with self._lock:
             try:
                 so = ort.SessionOptions()
-                so.intra_op_num_threads = 1 # Membatasi penggunaan thread CPU agar server tidak hang
+                so.intra_op_num_threads = 1 # membatasi penggunaan thread CPU agar server tidak hang
                 self.session = ort.InferenceSession(
                     self.model_path,
                     sess_options=so,
-                    providers=["CPUExecutionProvider"], # Menjalankan model murni dengan CPU
+                    providers=["CPUExecutionProvider"], # menjalankan model murni dengan CPU
                 )
 
                 # Menyimpan nama input dan output layer dari model
@@ -56,19 +54,20 @@ class ONNXEngine:
                 self.load_error = str(exc)
                 logger.error("Failed to load ONNX model at %s: %s", self.model_path, exc)
 
-    @property
+    @property # mengecek apakah model sudah siap digunakan
     def is_ready(self) -> bool:
         return self.session is not None
 
     def run(self, input_array: np.ndarray) -> float:
-        """Run a forward pass and return the single raw logit as a Python float."""
-        if not self.is_ready:
+         
+        if not self.is_ready: # apakah session sudah siap
             raise ModelNotLoadedError(
                 self.load_error or "Model ONNX tidak dimuat."
             )
-        outputs = self.session.run([self.output_name], {self.input_name: input_array})
-        logit = np.asarray(outputs[0]).reshape(-1)[0]
-        return float(logit)
+        
+        outputs = self.session.run([self.output_name], {self.input_name: input_array}) # menjalankan model ONNX dengan input yang diberikan
+        logit = np.asarray(outputs[0]).reshape(-1)[0] 
+        return float(logit) # mengembalikan hasil prediksi sebagai float
 
 
 def preprocess_image(image: Image.Image) -> np.ndarray:

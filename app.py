@@ -102,7 +102,4 @@ if __name__ == "__main__":
             inference.engine.load_error,
             config.ONNX_MODEL_PATH,
         )
-    # Local-only app: bind to localhost, debug off by default.
-    # Set debug=True temporarily during development if you need
-    # auto-reload and tracebacks in the browser.
     app.run(host="127.0.0.1", port=5000, debug=False)
